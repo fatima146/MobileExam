@@ -1,16 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
-import { FlashList } from '@shopify/flash-list';
-import { useNavigation } from '@react-navigation/native';
+import {
+  View,
+  Text,
+  TextInput,
+  ActivityIndicator,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  FlatList,
+} from 'react-native';
 import { getAllProducts } from '../api/products';
 
 export default function HomeScreen() {
   const [products, setProducts] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState('');
+  const [sortOption, setSortOption] = useState('alphabetical');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigation = useNavigation();
 
   useEffect(() => {
     loadProducts();
@@ -28,121 +37,278 @@ export default function HomeScreen() {
     }
   };
 
+  const applyFilters = (searchText, maxPriceValue, sortChoice) => {
+    let result = [...products];
+
+    if (searchText) {
+      result = result.filter((p) =>
+        p.title.toLowerCase().includes(searchText.toLowerCase())
+      );
+    }
+
+    if (maxPriceValue) {
+      const numeric = parseFloat(maxPriceValue);
+      if (!isNaN(numeric)) {
+        result = result.filter((p) => p.price <= numeric);
+      }
+    }
+
+    switch (sortChoice) {
+      case 'alphabetical':
+        result.sort((a, b) => a.title.localeCompare(b.title));
+        break;
+      case 'priceLow':
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case 'priceHigh':
+        result.sort((a, b) => b.price - a.price);
+        break;
+    }
+
+    setFiltered(result);
+  };
+
   const handleSearch = (text) => {
     setSearch(text);
-    const results = products.filter(p =>
-      p.title.toLowerCase().includes(text.toLowerCase())
-    );
-    setFiltered(results);
+    applyFilters(text, maxPrice, sortOption);
   };
 
-  const sortByName = () => {
-    setFiltered([...filtered].sort((a, b) => a.title.localeCompare(b.title)));
+  const handleSort = (option) => {
+    setSortOption(option);
+    applyFilters(search, maxPrice, option);
   };
 
-  const sortByPrice = () => {
-    setFiltered([...filtered].sort((a, b) => a.price - b.price));
+  const handlePriceFilter = (price) => {
+    setMaxPrice(price);
+    applyFilters(search, price, sortOption);
+  };
+
+  const toggleCart = (product) => {
+    if (cart.some((item) => item.id === product.id)) {
+      setCart(cart.filter((item) => item.id !== product.id));
+    } else {
+      setCart([...cart, product]);
+    }
   };
 
   if (loading) return <ActivityIndicator size="large" style={{ marginTop: 40 }} />;
   if (error) return <Text style={styles.error}>Error: {error}</Text>;
-  if (!filtered.length) return <Text style={styles.empty}>No results found</Text>;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Products</Text>
+      <Text style={styles.header}>🎁 MobileShop</Text>
 
+      {/* Search */}
       <TextInput
         style={styles.input}
         placeholder="Search products..."
         value={search}
         onChangeText={handleSearch}
-        placeholderTextColor="#9c8e8b"
       />
 
-      <View style={styles.sortContainer}>
-        <TouchableOpacity onPress={sortByName} style={styles.button}>
-          <Text style={styles.buttonText}>Sort by Name</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={sortByPrice} style={styles.button}>
-          <Text style={styles.buttonText}>Sort by Price</Text>
-        </TouchableOpacity>
+      {/* Sort + Max price */}
+      <View style={styles.filters}>
+        <View style={styles.filterBox}>
+          <Text style={styles.filterLabel}>Sort by:</Text>
+          <View style={styles.sortButtonsRow}>
+            <TouchableOpacity
+              style={[
+                styles.sortButton,
+                sortOption === 'alphabetical' && styles.sortButtonActive,
+              ]}
+              onPress={() => handleSort('alphabetical')}
+            >
+              <Text
+                style={[
+                  styles.sortButtonText,
+                  sortOption === 'alphabetical' && styles.sortButtonTextActive,
+                ]}
+              >
+                A–Z
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.sortButton,
+                sortOption === 'priceLow' && styles.sortButtonActive,
+              ]}
+              onPress={() => handleSort('priceLow')}
+            >
+              <Text
+                style={[
+                  styles.sortButtonText,
+                  sortOption === 'priceLow' && styles.sortButtonTextActive,
+                ]}
+              >
+                € ↑
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.sortButton,
+                sortOption === 'priceHigh' && styles.sortButtonActive,
+              ]}
+              onPress={() => handleSort('priceHigh')}
+            >
+              <Text
+                style={[
+                  styles.sortButtonText,
+                  sortOption === 'priceHigh' && styles.sortButtonTextActive,
+                ]}
+              >
+                € ↓
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.filterBox}>
+          <Text style={styles.filterLabel}>Max price (€):</Text>
+          <TextInput
+            style={styles.priceInput}
+            keyboardType="numeric"
+            placeholder="e.g. 100"
+            value={maxPrice}
+            onChangeText={handlePriceFilter}
+          />
+        </View>
       </View>
 
-      <FlashList
+      {/* Cart summary */}
+      <View style={styles.cartSummary}>
+        <Text style={styles.cartText}>🛒 {cart.length} items</Text>
+      </View>
+
+      {/* Products */}
+      <FlatList
         data={filtered}
         keyExtractor={(item) => item.id.toString()}
-        estimatedItemSize={100}
         renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Detail', { id: item.id })}
-            style={styles.card}
-          >
-            <Text style={styles.title}>{item.title}</Text>
-            <Text style={styles.price}>${item.price}</Text>
-          </TouchableOpacity>
+          <View style={styles.productCard}>
+            <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
+            <View style={styles.productInfo}>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.price}>€{item.price}</Text>
+            </View>
+            <TouchableOpacity
+              onPress={() => toggleCart(item)}
+              style={[
+                styles.cartButton,
+                cart.some((p) => p.id === item.id) && styles.cartButtonAdded,
+              ]}
+            >
+              <Text style={styles.cartButtonText}>
+                {cart.some((p) => p.id === item.id) ? '✓ Added' : 'Add'}
+              </Text>
+            </TouchableOpacity>
+          </View>
         )}
       />
+
+      {filtered.length === 0 && (
+        <Text style={styles.empty}>No products match your filters.</Text>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAF4F0',
-    padding: 16,
-  },
+  container: { flex: 1, padding: 15, backgroundColor: '#f7f7f7' },
   header: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#C47C7C',
-    marginBottom: 15,
     textAlign: 'center',
+    marginBottom: 15,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#E8A2A2',
+    borderColor: '#ccc',
     borderRadius: 10,
     padding: 10,
     backgroundColor: '#fff',
-    marginBottom: 12,
-    color: '#3E3E3E',
-  },
-  sortContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     marginBottom: 15,
   },
-  button: {
-    backgroundColor: '#E8A2A2',
-    paddingVertical: 8,
-    paddingHorizontal: 15,
+  filters: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  filterBox: { flex: 1, marginHorizontal: 4 },
+  filterLabel: { fontSize: 14, fontWeight: '600', marginBottom: 6 },
+  sortButtonsRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  sortButton: {
+    flex: 1,
+    paddingVertical: 6,
     borderRadius: 8,
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  card: {
+    borderWidth: 1,
+    borderColor: '#ccc',
     backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 14,
+    alignItems: 'center',
+  },
+  sortButtonActive: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+  },
+  sortButtonText: {
+    fontSize: 14,
+    color: '#333',
+    fontWeight: '500',
+  },
+  sortButtonTextActive: {
+    color: '#fff',
+  },
+  priceInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    paddingHorizontal: 8,
+    height: 40,
+  },
+  cartSummary: {
+    alignItems: 'flex-end',
+    marginVertical: 5,
+  },
+  cartText: { fontWeight: '600', color: '#333' },
+  productCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 10,
     marginVertical: 6,
+    padding: 10,
     shadowColor: '#000',
     shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
   },
-  title: {
-    fontSize: 16,
+  thumbnail: {
+    width: 70,
+    height: 70,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  productInfo: { flex: 1 },
+  title: { fontWeight: '600', fontSize: 15 },
+  price: { color: '#007bff', marginTop: 4 },
+  cartButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  cartButtonAdded: {
+    backgroundColor: '#28a745',
+  },
+  cartButtonText: {
+    color: '#fff',
     fontWeight: '600',
-    color: '#3E3E3E',
-  },
-  price: {
-    fontSize: 15,
-    color: '#C47C7C',
-    marginTop: 4,
   },
   error: { color: 'red', textAlign: 'center', marginTop: 20 },
   empty: { textAlign: 'center', marginTop: 20 },
