@@ -15,25 +15,26 @@ export default function App() {
           headerShown: false,
           tabBarIcon: ({ focused, color, size }) => {
             let iconName;
-
-            if (route.name === 'Home') {
-              iconName = focused ? 'bag-handle' : 'bag-handle-outline';
-            } else if (route.name === 'Profile') {
-              iconName = focused ? 'person' : 'person-outline';
-            }
-
-            return <Ionicons name={iconName} size={size} color={color} />;
+            if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
+            else if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
+            return <Ionicons name={iconName} size={22} color={color} />;
           },
-          tabBarActiveTintColor: '#B22222',
-          tabBarInactiveTintColor: '#006400',
+          tabBarActiveTintColor: '#C47C7C',
+          tabBarInactiveTintColor: '#7A6B68',
           tabBarStyle: {
-            backgroundColor: '#fff',
-            borderTopWidth: 1,
-            borderTopColor: '#ccc',
+            backgroundColor: '#FAF4F0',
+            borderTopWidth: 0,
             height: 60,
-            paddingBottom: 8,
+            shadowColor: '#000',
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 8,
           },
-          tabBarLabelStyle: { fontSize: 13, fontWeight: '600' },
+          tabBarLabelStyle: {
+            fontSize: 13,
+            fontWeight: '600',
+            paddingBottom: 5,
+          },
         })}
       >
         <Tab.Screen name="Home" component={HomeStack} />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useNavigation } from '@react-navigation/native';
 import { getAllProducts } from '../api/products';
@@ -13,9 +13,7 @@ export default function HomeScreen() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    console.log('Home mounted');
     loadProducts();
-    return () => console.log('Home unmounted');
   }, []);
 
   const loadProducts = async () => {
@@ -39,18 +37,11 @@ export default function HomeScreen() {
   };
 
   const sortByName = () => {
-    const sorted = [...filtered].sort((a, b) => a.title.localeCompare(b.title));
-    setFiltered(sorted);
+    setFiltered([...filtered].sort((a, b) => a.title.localeCompare(b.title)));
   };
 
   const sortByPrice = () => {
-    const sorted = [...filtered].sort((a, b) => a.price - b.price);
-    setFiltered(sorted);
-  };
-
-  const filterUnder100 = () => {
-    const filteredData = products.filter(p => p.price < 100);
-    setFiltered(filteredData);
+    setFiltered([...filtered].sort((a, b) => a.price - b.price));
   };
 
   if (loading) return <ActivityIndicator size="large" style={{ marginTop: 40 }} />;
@@ -59,37 +50,37 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>🛍️ Products</Text>
+      <Text style={styles.header}>Products</Text>
 
       <TextInput
         style={styles.input}
         placeholder="Search products..."
         value={search}
         onChangeText={handleSearch}
-        placeholderTextColor="#666"
+        placeholderTextColor="#9c8e8b"
       />
 
-      <View style={styles.buttons}>
-        <Button title="Sort by Name" color="#B22222" onPress={sortByName} />
-        <Button title="Sort by Price" color="#006400" onPress={sortByPrice} />
+      <View style={styles.sortContainer}>
+        <TouchableOpacity onPress={sortByName} style={styles.button}>
+          <Text style={styles.buttonText}>Sort by Name</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={sortByPrice} style={styles.button}>
+          <Text style={styles.buttonText}>Sort by Price</Text>
+        </TouchableOpacity>
       </View>
-
-      <Button title="💎 Filter under $100" color="#8B0000" onPress={filterUnder100} />
 
       <FlashList
         data={filtered}
         keyExtractor={(item) => item.id.toString()}
         estimatedItemSize={100}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text
-              style={styles.title}
-              onPress={() => navigation.navigate('Detail', { id: item.id })}
-            >
-              {item.title}
-            </Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Detail', { id: item.id })}
+            style={styles.card}
+          >
+            <Text style={styles.title}>{item.title}</Text>
             <Text style={styles.price}>${item.price}</Text>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </View>
@@ -99,58 +90,59 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F8F8',
-    padding: 15,
+    backgroundColor: '#FAF4F0',
+    padding: 16,
   },
   header: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#B22222',
-    marginVertical: 10,
+    color: '#C47C7C',
+    marginBottom: 15,
     textAlign: 'center',
-    letterSpacing: 1,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
+    borderColor: '#E8A2A2',
+    borderRadius: 10,
+    padding: 10,
     backgroundColor: '#fff',
-    fontSize: 16,
-    color: '#222',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
+    marginBottom: 12,
+    color: '#3E3E3E',
   },
-  buttons: {
+  sortContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 15,
   },
+  button: {
+    backgroundColor: '#E8A2A2',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
   card: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 15,
+    padding: 14,
     marginVertical: 6,
     shadowColor: '#000',
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.08,
     shadowRadius: 6,
     elevation: 3,
-    borderLeftWidth: 6,
-    borderLeftColor: '#B22222',
   },
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    color: '#3E3E3E',
   },
   price: {
     fontSize: 15,
-    color: '#006400',
-    fontWeight: 'bold',
+    color: '#C47C7C',
+    marginTop: 4,
   },
   error: { color: 'red', textAlign: 'center', marginTop: 20 },
   empty: { textAlign: 'center', marginTop: 20 },

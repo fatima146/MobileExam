@@ -1,88 +1,55 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
 
 export default function ProfileScreen() {
   return (
-    <View style={styles.container}>
-      <Image source={require('../assets/avatar.png')} style={styles.avatar} />
-
-      <Text style={styles.name}>Fatima Salamova</Text>
-      <Text style={styles.role}>Student — Graduaat Programmeren</Text>
-
-      <View style={styles.divider} />
-
-      <Text style={styles.bio}>
-        Passionate about mobile and web development.  
-        Always learning, creating, and helping others build their skills.
-      </Text>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>📚 Skills</Text>
-        <Text style={styles.cardItem}>• React Native</Text>
-        <Text style={styles.cardItem}>• JavaScript / TypeScript</Text>
-        <Text style={styles.cardItem}>• Web & Mobile Design</Text>
+    <ScrollView style={styles.container}>
+      <View style={styles.content}>
+        <Image source={require('../assets/avatar.png')} style={styles.avatar} />
+        <Text style={styles.name}>Fatima Salamova</Text>
+        <Text style={styles.role}>Student - Graduaat Programmeren</Text>
+        <Text style={styles.bio}>
+          Passionate about mobile and web development.
+          Enjoys creating useful applications that help others.
+        </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: '#F8F8F8', 
-    alignItems: 'center', 
-    padding: 25 
-  },
-  avatar: { 
-    width: 140, 
-    height: 140, 
-    borderRadius: 70, 
-    borderWidth: 3, 
-    borderColor: '#B22222', 
-    marginBottom: 20 
-  },
-  name: { 
-    fontSize: 24, 
-    fontWeight: '700', 
-    color: '#B22222' 
-  },
-  role: { 
-    fontSize: 16, 
-    color: '#006400', 
-    marginBottom: 15 
-  },
-  divider: {
-    width: '80%',
-    height: 1,
-    backgroundColor: '#ccc',
-    marginVertical: 15,
-  },
-  bio: { 
-    fontSize: 15, 
-    textAlign: 'center', 
-    color: '#333', 
-    lineHeight: 22, 
-    marginBottom: 20 
-  },
-  card: {
+  container: {
+    flex: 1,
     backgroundColor: '#fff',
-    width: '100%',
-    padding: 18,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 4,
   },
-  cardTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#B22222',
-    marginBottom: 8,
+  content: {
+    marginTop: 80, // 👈 this adds space from the top
+    paddingHorizontal: 20,
   },
-  cardItem: {
+  avatar: {
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    alignSelf: 'center',
+    marginBottom: 20,
+  },
+  name: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#222',
+    textAlign: 'center',
+  },
+  role: {
+    fontSize: 16,
+    color: '#555',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+  bio: {
     fontSize: 15,
-    color: '#333',
-    marginVertical: 2,
+    textAlign: 'center',
+    color: '#444',
+    marginTop: 12,
+    lineHeight: 22,
   },
 });
