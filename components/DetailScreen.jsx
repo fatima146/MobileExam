@@ -29,39 +29,30 @@ export default function DetailScreen({ route }) {
 
   return (
     <ScrollView style={styles.container}>
-      <Image
-        source={
-          product.thumbnail
-            ? { uri: product.thumbnail }
-            : { uri: 'https://via.placeholder.com/200x200?text=No+Image' }
-        }
-        style={styles.image}
-      />
+      <Image source={{ uri: product.thumbnail }} style={styles.image} />
       <Text style={styles.title}>{product.title}</Text>
-      <Text style={styles.desc}>{product.description}</Text>
-      <Text style={styles.price}>Price: ${product.price}</Text>
-      <Text style={styles.category}>Category: {product.category}</Text>
-      <Text style={styles.rating}>Rating: {product.rating}</Text>
+      <Text style={styles.price}>💰 €{product.price}</Text>
+      <Text style={styles.rating}>⭐ {product.rating}</Text>
+      <Text style={styles.category}>🏷️ {product.category}</Text>
+      <Text style={styles.description}>{product.description}</Text>
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: '#FAF4F0',
-    padding: 20,
-  },
+  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
   image: {
     width: '100%',
     height: 250,
     borderRadius: 12,
+    resizeMode: 'contain',
     marginBottom: 20,
   },
-  title: { fontSize: 22, fontWeight: '700', color: '#C47C7C', marginBottom: 10 },
-  desc: { fontSize: 15, color: '#3E3E3E', lineHeight: 22, marginBottom: 10 },
-  price: { fontSize: 17, color: '#C47C7C', fontWeight: '600', marginTop: 5 },
-  category: { fontSize: 15, color: '#7A6B68', marginTop: 5 },
-  rating: { fontSize: 15, color: '#7A6B68', marginTop: 5 },
+  title: { fontSize: 22, fontWeight: '700', marginBottom: 10 },
+  price: { fontSize: 18, color: '#007bff', marginBottom: 5 },
+  rating: { fontSize: 16, color: '#444', marginBottom: 5 },
+  category: { fontSize: 16, color: '#555', marginBottom: 15 },
+  description: { fontSize: 15, color: '#333', lineHeight: 22 },
   error: { color: 'red', textAlign: 'center', marginTop: 20 },
   empty: { textAlign: 'center', marginTop: 20 },
 });

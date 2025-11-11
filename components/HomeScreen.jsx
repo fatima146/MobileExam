@@ -10,6 +10,7 @@ import {
   FlatList,
 } from 'react-native';
 import { getAllProducts } from '../api/products';
+import { useNavigation } from '@react-navigation/native';
 
 export default function HomeScreen() {
   const [products, setProducts] = useState([]);
@@ -20,6 +21,8 @@ export default function HomeScreen() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     loadProducts();
@@ -181,12 +184,16 @@ export default function HomeScreen() {
         <Text style={styles.cartText}>🛒 {cart.length} items</Text>
       </View>
 
-      {/* Products */}
+      {/* Product List */}
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
-          <View style={styles.productCard}>
+          <TouchableOpacity
+            style={styles.productCard}
+            onPress={() => navigation.navigate('Detail', { id: item.id })}
+            activeOpacity={0.7}
+          >
             <Image source={{ uri: item.thumbnail }} style={styles.thumbnail} />
             <View style={styles.productInfo}>
               <Text style={styles.title}>{item.title}</Text>
@@ -203,13 +210,10 @@ export default function HomeScreen() {
                 {cart.some((p) => p.id === item.id) ? '✓ Added' : 'Add'}
               </Text>
             </TouchableOpacity>
-          </View>
+          </TouchableOpacity>
         )}
+        ListEmptyComponent={<Text style={styles.empty}>No products found.</Text>}
       />
-
-      {filtered.length === 0 && (
-        <Text style={styles.empty}>No products match your filters.</Text>
-      )}
     </View>
   );
 }
@@ -237,10 +241,7 @@ const styles = StyleSheet.create({
   },
   filterBox: { flex: 1, marginHorizontal: 4 },
   filterLabel: { fontSize: 14, fontWeight: '600', marginBottom: 6 },
-  sortButtonsRow: {
-    flexDirection: 'row',
-    gap: 6,
-  },
+  sortButtonsRow: { flexDirection: 'row', gap: 6 },
   sortButton: {
     flex: 1,
     paddingVertical: 6,
@@ -250,18 +251,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
   },
-  sortButtonActive: {
-    backgroundColor: '#007bff',
-    borderColor: '#007bff',
-  },
-  sortButtonText: {
-    fontSize: 14,
-    color: '#333',
-    fontWeight: '500',
-  },
-  sortButtonTextActive: {
-    color: '#fff',
-  },
+  sortButtonActive: { backgroundColor: '#007bff', borderColor: '#007bff' },
+  sortButtonText: { fontSize: 14, color: '#333', fontWeight: '500' },
+  sortButtonTextActive: { color: '#fff' },
   priceInput: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -270,10 +262,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     height: 40,
   },
-  cartSummary: {
-    alignItems: 'flex-end',
-    marginVertical: 5,
-  },
+  cartSummary: { alignItems: 'flex-end', marginVertical: 5 },
   cartText: { fontWeight: '600', color: '#333' },
   productCard: {
     flexDirection: 'row',
@@ -288,12 +277,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 2,
   },
-  thumbnail: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-    marginRight: 10,
-  },
+  thumbnail: { width: 70, height: 70, borderRadius: 8, marginRight: 10 },
   productInfo: { flex: 1 },
   title: { fontWeight: '600', fontSize: 15 },
   price: { color: '#007bff', marginTop: 4 },
@@ -303,13 +287,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 8,
   },
-  cartButtonAdded: {
-    backgroundColor: '#28a745',
-  },
-  cartButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
+  cartButtonAdded: { backgroundColor: '#28a745' },
+  cartButtonText: { color: '#fff', fontWeight: '600' },
   error: { color: 'red', textAlign: 'center', marginTop: 20 },
   empty: { textAlign: 'center', marginTop: 20 },
 });
